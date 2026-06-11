@@ -32,13 +32,22 @@
   }
 
   /* ===== SUBTLE BACKGROUND ===== */
-  #bgCanvas {
+  .bg-grid {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: 0;
     pointer-events: none;
+    background-image:
+      radial-gradient(circle at 15% 40%, rgba(108,92,231,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 85% 20%, rgba(0,184,148,0.03) 0%, transparent 50%),
+      radial-gradient(circle at 60% 80%, rgba(9,132,227,0.03) 0%, transparent 50%);
   }
+  .bg-line {
+    position: fixed; z-index: 0; pointer-events: none; opacity: 0.05;
+  }
+  .bg-line.h { height: 1px; width: 100%; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+  .bg-line.v { width: 1px; height: 100%; background: linear-gradient(180deg, transparent, var(--accent), transparent); }
 
   .deck { position: relative; z-index: 1; width: 100%; height: 100%; }
 
@@ -248,7 +257,13 @@
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
+<div class="bg-grid"></div>
+<div class="bg-line h" style="top:20%"></div>
+<div class="bg-line h" style="top:50%"></div>
+<div class="bg-line h" style="top:80%"></div>
+<div class="bg-line v" style="left:25%"></div>
+<div class="bg-line v" style="left:50%"></div>
+<div class="bg-line v" style="left:75%"></div>
 
 <!-- SVG ICONS -->
 <svg style="display:none">
@@ -736,8 +751,8 @@
 <button class="nav-btn next" onclick="changeSlide(1)"><svg><use href="#icon-chevron-right"/></svg></button>
 
 <script>
-  var slides = document.querySelectorAll('.slide');
-  var current = 0;
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
 
   function goTo(n) {
     if (n < 0 || n >= slides.length) return;
@@ -746,167 +761,55 @@
     current = n;
     slides[current].classList.remove('exit-up');
     slides[current].classList.add('active');
-    setTimeout(function(){ slides.forEach(function(s,i){ if(i!==current) s.classList.remove('exit-up'); }); }, 800);
+    setTimeout(() => slides.forEach((s,i) => { if(i!==current) s.classList.remove('exit-up'); }), 800);
   }
-
   function changeSlide(dir) { goTo(current + dir); }
 
-  document.addEventListener('keydown', function(e){
+  document.addEventListener('keydown', e => {
     if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); changeSlide(1); }
     if(e.key==='ArrowLeft') { e.preventDefault(); changeSlide(-1); }
   });
 
   // Word reveal
-  document.querySelectorAll('.word-reveal').forEach(function(el){
-    var text = el.textContent.trim();
-    el.innerHTML = text.split(/\s+/).map(function(w,i){
-      return '<span class="word" style="transition-delay:'+(0.2+i*0.12)+'s">'+w+'</span>';
-    }).join(' ');
+  document.querySelectorAll('.word-reveal').forEach(el => {
+    const text = el.textContent.trim();
+    el.innerHTML = text.split(/\s+/).map((w,i) =>
+      `<span class="word" style="transition-delay:${0.2 + i*0.12}s">${w}</span>`
+    ).join(' ');
   });
 
-  // ============================================================
-  // INFINITE BACKGROUND ANIMATION — floating motion graphics
-  // ============================================================
+  // ===== SIMPLE CANVAS BACKGROUND =====
   (function(){
-    var cvs = document.getElementById('bgCanvas');
-    var ctx = cvs.getContext('2d');
+    var c = document.createElement('canvas');
+    c.id = 'bgCanvas';
+    c.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4';
+    document.body.insertBefore(c, document.body.firstChild);
+    var ctx = c.getContext('2d');
     var W, H;
-    function resize(){ W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; }
+    function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', resize);
-
-    var ICONS = ['⚡','🧠','⚙️','🎯','✅','💬','📊','🔗','🌐','💡','🔔','📋'];
-    var COLORS = [
-      'rgba(108,92,231,0.13)','rgba(225,112,85,0.10)','rgba(0,184,148,0.10)',
-      'rgba(9,132,227,0.10)','rgba(162,155,254,0.09)'
-    ];
-
-    // --- Floating icon nodes ---
-    var nodes = [];
-    for(var i=0;i<14;i++){
-      nodes.push({
-        x:Math.random()*W, y:Math.random()*H,
-        vx:(Math.random()-0.5)*0.12, vy:(Math.random()-0.5)*0.1,
-        r:18+Math.random()*14,
-        icon:ICONS[i%ICONS.length],
-        ph:Math.random()*6.28, sp:0.003+Math.random()*0.005
-      });
-    }
-
-    // --- Flowing particles ---
-    var particles = [];
-    for(var i=0;i<35;i++){
-      var a=nodes[Math.floor(Math.random()*nodes.length)];
-      var b=nodes[Math.floor(Math.random()*nodes.length)];
-      particles.push({
-        x:a.x, y:a.y, tx:b.x, ty:b.y,
-        t:Math.random(), sp:0.0005+Math.random()*0.001,
-        size:2+Math.random()*2,
-        color:COLORS[i%COLORS.length]
-      });
-    }
-
-    // --- Ambient dots ---
     var dots = [];
-    for(var i=0;i<40;i++){
-      dots.push({
-        x:Math.random()*W, y:Math.random()*H,
-        r:1+Math.random()*2,
-        vx:(Math.random()-0.5)*0.04, vy:(Math.random()-0.5)*0.04,
-        o:0.06+Math.random()*0.1
-      });
+    for(var i=0;i<60;i++){
+      dots.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2,vx:(Math.random()-0.5)*0.15,vy:(Math.random()-0.5)*0.15,o:0.08+Math.random()*0.15});
     }
-
-    // --- Large soft orbs ---
-    var orbs = [];
-    for(var i=0;i<3;i++){
-      orbs.push({
-        x:Math.random()*W, y:Math.random()*H,
-        r:140+Math.random()*160,
-        c:COLORS[i%COLORS.length].replace('0.13)','0.04)').replace('0.10)','0.03)').replace('0.09)','0.025)').replace('0.04)','0.03)').replace('0.03)','0.02)').replace('0.025)','0.02)'),
-        vx:(Math.random()-0.5)*0.06, vy:(Math.random()-0.5)*0.05
-      });
-    }
-
     function frame(){
       ctx.clearRect(0,0,W,H);
-
-      // Orbs
-      for(var i=0;i<orbs.length;i++){
-        var o=orbs[i]; o.x+=o.vx; o.y+=o.vy;
-        if(o.x<-200)o.x=W+200; if(o.x>W+200)o.x=-200; if(o.y<-200)o.y=H+200; if(o.y>H+200)o.y=-200;
-        var g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-        g.addColorStop(0,o.c); g.addColorStop(1,'transparent');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,6.283); ctx.fill();
-      }
-
-      // Connection lines between nearby nodes
-      ctx.lineWidth=0.8;
-      for(var i=0;i<nodes.length;i++){
-        for(var j=i+1;j<nodes.length;j++){
-          var dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
-          var dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist<300){
-            var alpha=(1-dist/300)*0.06;
-            ctx.strokeStyle='rgba(108,92,231,'+alpha+')';
-            ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
-          }
-        }
-      }
-
-      // Flowing particles
-      for(var i=0;i<particles.length;i++){
-        var p=particles[i]; p.t+=p.sp;
-        if(p.t>=1){
-          var a2=nodes[Math.floor(Math.random()*nodes.length)];
-          var b2=nodes[Math.floor(Math.random()*nodes.length)];
-          p.x=a2.x; p.y=a2.y; p.tx=b2.x; p.ty=b2.y; p.t=0;
-        }
-        var px=p.x+(p.tx-p.x)*p.t, py=p.y+(p.ty-p.y)*p.t;
-        var ta=Math.sin(p.t*6.283)*0.5;
-        var grad=ctx.createRadialGradient(px,py,0,px,py,p.size*4);
-        grad.addColorStop(0,p.color.replace(/\d+\.?\d*\)$/,ta+')'));
-        grad.addColorStop(1,p.color.replace(/\d+\.?\d*\)$/,'0)'));
-        ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,p.size*4,0,6.283); ctx.fill();
-        ctx.fillStyle=p.color.replace(/\d+\.?\d*\)$/,(ta*0.6)+')'));
-        ctx.beginPath(); ctx.arc(px,py,p.size,0,6.283); ctx.fill();
-      }
-
-      // Nodes with emoji icons
-      for(var i=0;i<nodes.length;i++){
-        var n=nodes[i]; n.x+=n.vx; n.y+=n.vy;
-        if(n.x<-40)n.x=W+40; if(n.x>W+40)n.x=-40; if(n.y<-40)n.y=H+40; if(n.y>H+40)n.y=-40;
-        n.ph+=n.ph;
-        var ps=1+Math.sin(n.ph)*0.08;
-        var r=n.r*ps;
-
-        // Glow
-        var ga=0.04+Math.sin(n.ph)*0.02;
-        var gg=ctx.createRadialGradient(n.x,n.y,r*0.5,n.x,n.y,r*2.5);
-        gg.addColorStop(0,'rgba(108,92,231,'+ga+')');
-        gg.addColorStop(1,'rgba(108,92,231,0)');
-        ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(n.x,n.y,r*2.5,0,6.283); ctx.fill();
-
-        // Circle
-        ctx.fillStyle='rgba(255,255,255,0.06)';
-        ctx.strokeStyle='rgba(108,92,231,0.08)';
-        ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.arc(n.x,n.y,r,0,6.283); ctx.fill(); ctx.stroke();
-
-        // Emoji icon
-        ctx.font=(r*0.8)+'px serif';
-        ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(n.icon,n.x,n.y+1);
-      }
-
-      // Ambient dots
       for(var i=0;i<dots.length;i++){
         var d=dots[i]; d.x+=d.vx; d.y+=d.vy;
         if(d.x<0)d.x=W; if(d.x>W)d.x=0; if(d.y<0)d.y=H; if(d.y>H)d.y=0;
         ctx.fillStyle='rgba(108,92,231,'+d.o+')';
         ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,6.283); ctx.fill();
       }
-
+      // Connections
+      ctx.lineWidth=0.5;
+      for(var i=0;i<dots.length;i++){
+        for(var j=i+1;j<dots.length;j++){
+          var dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y;
+          var dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<200){ ctx.strokeStyle='rgba(108,92,231,'+(1-dist/200)*0.04+')'; ctx.beginPath(); ctx.moveTo(dots[i].x,dots[i].y); ctx.lineTo(dots[j].x,dots[j].y); ctx.stroke(); }
+        }
+      }
       requestAnimationFrame(frame);
     }
     frame();
