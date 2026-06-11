@@ -778,38 +778,207 @@
     ).join(' ');
   });
 
-  // ===== SIMPLE CANVAS BACKGROUND =====
+  // ===== FLOATING ICONS BACKGROUND =====
   (function(){
     var c = document.createElement('canvas');
     c.id = 'bgCanvas';
-    c.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4';
+    c.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.5';
     document.body.insertBefore(c, document.body.firstChild);
     var ctx = c.getContext('2d');
     var W, H;
     function resize(){ W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
     resize();
     window.addEventListener('resize', resize);
-    var dots = [];
-    for(var i=0;i<60;i++){
-      dots.push({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2,vx:(Math.random()-0.5)*0.15,vy:(Math.random()-0.5)*0.15,o:0.08+Math.random()*0.15});
+
+    // Icon definitions — simple SVG-like paths scaled to radius
+    var iconPaths = [
+      // brain
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.7,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(-r*0.25,-r*0.15,r*0.35,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(r*0.25,-r*0.15,r*0.35,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,-r*0.7); ctx.quadraticCurveTo(r*0.5,-r*0.5,r*0.7,0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,-r*0.7); ctx.quadraticCurveTo(-r*0.5,-r*0.5,-r*0.7,0); ctx.stroke();
+      },
+      // gear
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.45,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0,0,r*0.2,0,6.283); ctx.fill();
+        for(var i=0;i<8;i++){var a=i*0.785;ctx.beginPath();ctx.moveTo(Math.cos(a)*r*0.5,Math.sin(a)*r*0.5);ctx.lineTo(Math.cos(a)*r*0.85,Math.sin(a)*r*0.85);ctx.lineTo(Math.cos(a+0.2)*r*0.75,Math.sin(a+0.2)*r*0.75);ctx.lineTo(Math.cos(a+0.58)*r*0.75,Math.sin(a+0.58)*r*0.75);ctx.lineTo(Math.cos(a+0.785)*r*0.85,Math.sin(a+0.785)*r*0.85);ctx.lineTo(Math.cos(a+0.785)*r*0.5,Math.sin(a+0.785)*r*0.5);ctx.closePath();ctx.fill();}
+      },
+      // target
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.8,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0,0,r*0.5,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0,0,r*0.2,0,6.283); ctx.fill();
+      },
+      // bolt
+      function(r){
+        ctx.beginPath(); ctx.moveTo(r*0.25,-r*0.8); ctx.lineTo(-r*0.35,r*0.1); ctx.lineTo(0,r*0.1); ctx.lineTo(-r*0.25,r*0.8); ctx.lineTo(r*0.35,-r*0.1); ctx.lineTo(0,-r*0.1); ctx.closePath(); ctx.fill();
+      },
+      // check
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.7,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.35,0); ctx.lineTo(-r*0.1,r*0.25); ctx.lineTo(r*0.35,-r*0.25); ctx.stroke();
+      },
+      // database
+      function(r){
+        ctx.beginPath(); ctx.ellipse(0,-r*0.3,r*0.6,r*0.25,0,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(0,r*0.3,r*0.6,r*0.25,0,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.6,-r*0.3); ctx.lineTo(-r*0.6,r*0.3); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(r*0.6,-r*0.3); ctx.lineTo(r*0.6,r*0.3); ctx.stroke();
+      },
+      // link
+      function(r){
+        ctx.beginPath(); ctx.arc(-r*0.3,0,r*0.25,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.arc(r*0.3,0,r*0.25,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.3,-r*0.25); ctx.lineTo(r*0.3,-r*0.25); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.3,r*0.25); ctx.lineTo(r*0.3,r*0.25); ctx.stroke();
+      },
+      // chart
+      function(r){
+        ctx.beginPath(); ctx.moveTo(-r*0.6,r*0.6); ctx.lineTo(-r*0.6,-r*0.2); ctx.lineTo(-r*0.15,-r*0.2); ctx.lineTo(-r*0.15,r*0.1); ctx.lineTo(r*0.3,r*0.1); ctx.lineTo(r*0.3,-r*0.5); ctx.lineTo(r*0.6,-r*0.5); ctx.lineTo(r*0.6,r*0.6); ctx.closePath(); ctx.stroke();
+      },
+      // cpu/chip
+      function(r){
+        ctx.beginPath(); ctx.rect(-r*0.4,-r*0.4,r*0.8,r*0.8); ctx.stroke();
+        ctx.beginPath(); ctx.rect(-r*0.15,-r*0.15,r*0.3,r*0.3); ctx.fill();
+        var pad=r*0.4;ctx.beginPath();ctx.moveTo(-pad,-r*0.25);ctx.lineTo(-r*0.65,-r*0.25);ctx.moveTo(-pad,r*0.25);ctx.lineTo(-r*0.65,r*0.25);ctx.moveTo(pad,-r*0.25);ctx.lineTo(r*0.65,-r*0.25);ctx.moveTo(pad,r*0.25);ctx.lineTo(r*0.65,r*0.25);ctx.moveTo(-r*0.25,-pad);ctx.lineTo(-r*0.25,-r*0.65);ctx.moveTo(r*0.25,-pad);ctx.lineTo(r*0.25,-r*0.65);ctx.moveTo(-r*0.25,pad);ctx.lineTo(-r*0.25,r*0.65);ctx.moveTo(r*0.25,pad);ctx.lineTo(r*0.25,r*0.65);ctx.stroke();
+      },
+      // globe
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.7,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(0,0,r*0.7,r*0.35,0,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,-r*0.7); ctx.lineTo(0,r*0.7); ctx.stroke();
+      },
+      // shield
+      function(r){
+        ctx.beginPath(); ctx.moveTo(0,-r*0.7); ctx.lineTo(r*0.6,-r*0.35); ctx.lineTo(r*0.5,r*0.2); ctx.lineTo(0,r*0.7); ctx.lineTo(-r*0.5,r*0.2); ctx.lineTo(-r*0.6,-r*0.35); ctx.closePath(); ctx.stroke();
+      },
+      // layers
+      function(r){
+        ctx.beginPath(); ctx.moveTo(-r*0.5,r*0.3); ctx.lineTo(0,-r*0.1); ctx.lineTo(r*0.5,r*0.3); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.5,0); ctx.lineTo(0,-r*0.4); ctx.lineTo(r*0.5,0); ctx.closePath(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.5,-r*0.3); ctx.lineTo(0,-r*0.7); ctx.lineTo(r*0.5,-r*0.3); ctx.closePath(); ctx.stroke();
+      },
+      // dollar
+      function(r){
+        ctx.beginPath(); ctx.arc(0,0,r*0.65,0,6.283); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,-r*0.5); ctx.lineTo(0,r*0.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.25,-r*0.25); ctx.quadraticCurveTo(0,-r*0.5,r*0.25,-r*0.25); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-r*0.25,r*0.25); ctx.quadraticCurveTo(0,r*0.5,r*0.25,r*0.25); ctx.stroke();
+      }
+    ];
+
+    // Create floating icon nodes — SLOW drift for retention
+    var nodes = [];
+    var nodeCount = 12;
+    for(var i=0;i<nodeCount;i++){
+      nodes.push({
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.08, vy:(Math.random()-0.5)*0.06,
+        r:22+Math.random()*16,
+        icon:iconPaths[i%iconPaths.length],
+        ph:Math.random()*6.28, sp:0.004+Math.random()*0.004,
+        drift:(Math.random()-0.5)*0.001
+      });
     }
+
+    // Ambient dots — very slow
+    var ambDots = [];
+    for(var i=0;i<30;i++){
+      ambDots.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r:1+Math.random()*1.5,
+        vx:(Math.random()-0.5)*0.04, vy:(Math.random()-0.5)*0.03,
+        o:0.06+Math.random()*0.1
+      });
+    }
+
+    // Flowing particles between nodes
+    var particles = [];
+    for(var i=0;i<20;i++){
+      var a=nodes[Math.floor(Math.random()*nodes.length)];
+      var b=nodes[Math.floor(Math.random()*nodes.length)];
+      particles.push({x:a.x,y:a.y,tx:b.x,ty:b.y,t:Math.random(),sp:0.0008+Math.random()*0.0008,size:1.5+Math.random()*1.5});
+    }
+
     function frame(){
       ctx.clearRect(0,0,W,H);
-      for(var i=0;i<dots.length;i++){
-        var d=dots[i]; d.x+=d.vx; d.y+=d.vy;
+
+      // Ambient dots
+      for(var i=0;i<ambDots.length;i++){
+        var d=ambDots[i]; d.x+=d.vx; d.y+=d.vy;
         if(d.x<0)d.x=W; if(d.x>W)d.x=0; if(d.y<0)d.y=H; if(d.y>H)d.y=0;
         ctx.fillStyle='rgba(108,92,231,'+d.o+')';
         ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,6.283); ctx.fill();
       }
-      // Connections
-      ctx.lineWidth=0.5;
-      for(var i=0;i<dots.length;i++){
-        for(var j=i+1;j<dots.length;j++){
-          var dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y;
+
+      // Connection lines — very faint
+      ctx.lineWidth=0.6;
+      for(var i=0;i<nodes.length;i++){
+        for(var j=i+1;j<nodes.length;j++){
+          var dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
           var dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist<200){ ctx.strokeStyle='rgba(108,92,231,'+(1-dist/200)*0.04+')'; ctx.beginPath(); ctx.moveTo(dots[i].x,dots[i].y); ctx.lineTo(dots[j].x,dots[j].y); ctx.stroke(); }
+          if(dist<350){
+            var alpha=(1-dist/350)*0.05;
+            ctx.strokeStyle='rgba(108,92,231,'+alpha+')';
+            ctx.beginPath(); ctx.moveTo(nodes[i].x,nodes[i].y); ctx.lineTo(nodes[j].x,nodes[j].y); ctx.stroke();
+          }
         }
       }
+
+      // Flowing particles along connections
+      for(var i=0;i<particles.length;i++){
+        var p=particles[i]; p.t+=p.sp;
+        if(p.t>=1){
+          var a2=nodes[Math.floor(Math.random()*nodes.length)];
+          var b2=nodes[Math.floor(Math.random()*nodes.length)];
+          p.x=a2.x; p.y=a2.y; p.tx=b2.x; p.ty=b2.y; p.t=0;
+        }
+        var px=p.x+(p.tx-p.x)*p.t, py=p.y+(p.ty-p.y)*p.t;
+        var ta=Math.sin(p.t*6.283)*0.4;
+        ctx.fillStyle='rgba(108,92,231,'+ta+')';
+        ctx.beginPath(); ctx.arc(px,py,p.size,0,6.283); ctx.fill();
+      }
+
+      // Floating icon nodes
+      for(var i=0;i<nodes.length;i++){
+        var n=nodes[i];
+        n.x+=n.vx; n.y+=n.vy+n.drift;
+        if(n.x<-60)n.x=W+60; if(n.x>W+60)n.x=-60;
+        if(n.y<-60)n.y=H+60; if(n.y>H+60)n.y=-60;
+        n.ph+=n.sp;
+        var ps=1+Math.sin(n.ph)*0.06;
+        var nr=n.r*ps;
+
+        // Soft glow
+        var ga=0.04+Math.sin(n.ph)*0.015;
+        var gg=ctx.createRadialGradient(n.x,n.y,nr*0.3,n.x,n.y,nr*2.2);
+        gg.addColorStop(0,'rgba(108,92,231,'+ga+')');
+        gg.addColorStop(1,'rgba(108,92,231,0)');
+        ctx.fillStyle=gg;
+        ctx.beginPath(); ctx.arc(n.x,n.y,nr*2.2,0,6.283); ctx.fill();
+
+        // Circle background
+        ctx.fillStyle='rgba(255,255,255,0.07)';
+        ctx.strokeStyle='rgba(108,92,231,0.1)';
+        ctx.lineWidth=1;
+        ctx.beginPath(); ctx.arc(n.x,n.y,nr,0,6.283); ctx.fill(); ctx.stroke();
+
+        // Draw icon
+        ctx.save();
+        ctx.translate(n.x,n.y);
+        ctx.scale(nr/30,nr/30);
+        ctx.strokeStyle='rgba(108,92,231,0.25)';
+        ctx.fillStyle='rgba(108,92,231,0.2)';
+        ctx.lineWidth=1.5;
+        ctx.lineCap='round';
+        ctx.lineJoin='round';
+        n.icon(30);
+        ctx.restore();
+      }
+
       requestAnimationFrame(frame);
     }
     frame();
