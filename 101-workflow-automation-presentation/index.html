@@ -886,11 +886,11 @@
   });
 
   document.addEventListener('keydown', e => {
-    if(e.key==='ArrowRight'||e.key===' ') changeSlide(1);
-    if(e.key==='ArrowLeft') changeSlide(-1);
+    if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); changeSlide(1); }
+    if(e.key==='ArrowLeft') { e.preventDefault(); changeSlide(-1); }
   });
 
-  // ===== WORD REVEAL: split text into words =====
+  // ===== WORD REVEAL =====
   document.querySelectorAll('.word-reveal').forEach(el => {
     const text = el.textContent.trim();
     el.innerHTML = text.split(/\s+/).map((w,i) =>
@@ -899,194 +899,183 @@
   });
 
   // ============================================================
-  // INFINITE BACKGROUND ANIMATION — floating motion graphics
+  // INFINITE BACKGROUND ANIMATION
   // ============================================================
-  const canvas = document.getElementById('bgCanvas');
-  const ctx2 = canvas.getContext('2d');
-  let W, H;
-  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  resize();
-  window.addEventListener('resize', resize);
+  (function(){
+    var cvs = document.getElementById('bgCanvas');
+    var ctx = cvs.getContext('2d');
+    var W, H;
+    function resize(){ W = cvs.width = window.innerWidth; H = cvs.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
 
-  // --- Icon drawing functions ---
-  const ICONS = {
-    gear: (ctx, x, y, s, c) => {
-      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1.4; ctx.beginPath();
-      for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*14,Math.sin(a)*14);}
-      ctx.stroke();ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(0,0,3,0,Math.PI*2);ctx.stroke();
+    var COLORS = [
+      'rgba(108,92,231,0.10)','rgba(225,112,85,0.08)','rgba(0,184,148,0.08)',
+      'rgba(9,132,227,0.08)','rgba(162,155,254,0.06)'
+    ];
+
+    // --- Draw gear icon ---
+    function drawGear(x,y,s,c){
+      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(0,0,7,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,3,0,6.283); ctx.stroke();
+      for(var i=0;i<8;i++){var a=i*0.785;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*14,Math.sin(a)*14);ctx.stroke();}
       ctx.restore();
-    },
-    bolt: (ctx, x, y, s, c) => {
+    }
+    // --- Draw bolt icon ---
+    function drawBolt(x,y,s,c){
       ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.fillStyle=c;
       ctx.beginPath(); ctx.moveTo(4,-14); ctx.lineTo(-6,2); ctx.lineTo(0,2); ctx.lineTo(-4,14); ctx.lineTo(6,-2); ctx.lineTo(0,-2); ctx.closePath(); ctx.fill();
       ctx.restore();
-    },
-    node: (ctx, x, y, s, c) => {
-      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1.2;
-      ctx.beginPath(); ctx.arc(0,0,8,0,Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fillStyle=c; ctx.fill();
-      ctx.restore();
-    },
-    arrow: (ctx, x, y, s, c, rot) => {
-      ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.scale(s,s); ctx.fillStyle=c;
-      ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(-6,-7); ctx.lineTo(-6,-2); ctx.lineTo(-10,-2); ctx.lineTo(-10,2); ctx.lineTo(-6,2); ctx.lineTo(-6,7); ctx.closePath(); ctx.fill();
-      ctx.restore();
-    },
-    diamond: (ctx, x, y, s, c) => {
-      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1.2;
-      ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(10,0); ctx.lineTo(0,10); ctx.lineTo(-10,0); ctx.closePath(); ctx.stroke();
-      ctx.restore();
-    },
-    circle_ring: (ctx, x, y, s, c) => {
+    }
+    // --- Draw node icon ---
+    function drawNode(x,y,s,c){
       ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.arc(0,0,10,0,Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.stroke();
-      ctx.restore();
-    },
-    wave: (ctx, x, y, s, c) => {
-      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1.2;
-      ctx.beginPath(); ctx.moveTo(-12,0); for(let i=-12;i<=12;i+=2){ctx.lineTo(i, Math.sin(i*0.5)*5);} ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,8,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,3,0,6.283); ctx.fillStyle=c; ctx.fill();
       ctx.restore();
     }
-  };
-  const iconKeys = Object.keys(ICONS);
-  const COLORS = [
-    'rgba(108,92,231,0.12)', 'rgba(225,112,85,0.10)', 'rgba(0,184,148,0.10)',
-    'rgba(9,132,227,0.10)', 'rgba(162,155,254,0.08)'
-  ];
+    // --- Draw diamond icon ---
+    function drawDiamond(x,y,s,c){
+      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(10,0); ctx.lineTo(0,10); ctx.lineTo(-10,0); ctx.closePath(); ctx.stroke();
+      ctx.restore();
+    }
+    // --- Draw wave icon ---
+    function drawWave(x,y,s,c){
+      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(-12,0);
+      for(var i=-12;i<=12;i+=2) ctx.lineTo(i, Math.sin(i*0.5)*5);
+      ctx.stroke(); ctx.restore();
+    }
+    // --- Draw circle ring ---
+    function drawRing(x,y,s,c){
+      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(0,0,10,0,6.283); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,5,0,6.283); ctx.stroke();
+      ctx.restore();
+    }
+    // --- Draw hexagon ---
+    function drawHex(x,y,s,c){
+      ctx.save(); ctx.translate(x,y); ctx.scale(s,s); ctx.strokeStyle=c; ctx.lineWidth=1;
+      ctx.beginPath();
+      for(var i=0;i<6;i++){var a=i*1.047; var px=Math.cos(a)*10, py=Math.sin(a)*10; if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);}
+      ctx.closePath(); ctx.stroke(); ctx.restore();
+    }
 
-  // --- Floating icons ---
-  const floatingIcons = [];
-  for(let i=0;i<22;i++) {
-    floatingIcons.push({
-      x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.18,
-      icon: iconKeys[i%iconKeys.length],
-      scale: 0.6+Math.random()*0.7,
-      color: COLORS[i%COLORS.length],
-      rot: Math.random()*Math.PI*2,
-      rotSpeed: (Math.random()-0.5)*0.003,
-      pulse: Math.random()*Math.PI*2,
-      pulseSpeed: 0.005+Math.random()*0.008,
-      driftPhase: Math.random()*Math.PI*2,
-      driftSpeed: 0.003+Math.random()*0.004
-    });
-  }
+    var drawFns = [drawGear, drawBolt, drawNode, drawDiamond, drawWave, drawRing, drawHex];
 
-  // --- Flowing connection lines ---
-  const connections = [];
-  for(let i=0;i<12;i++) {
-    connections.push({
-      x1: Math.random()*W, y1: Math.random()*H,
-      x2: Math.random()*W, y2: Math.random()*H,
-      progress: Math.random(),
-      speed: 0.0004+Math.random()*0.0006,
-      color: COLORS[i%COLORS.length],
-      width: 0.5+Math.random()*1
-    });
-  }
+    // --- Floating icons ---
+    var icons = [];
+    for(var i=0;i<20;i++){
+      icons.push({
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.2, vy:(Math.random()-0.5)*0.15,
+        fn: drawFns[i%drawFns.length],
+        s:0.6+Math.random()*0.6,
+        c:COLORS[i%COLORS.length],
+        ph:Math.random()*6.28, sp:0.004+Math.random()*0.006,
+        drift:Math.random()*6.28, ds:0.002+Math.random()*0.003
+      });
+    }
 
-  // --- Ambient particles ---
-  const particles = [];
-  for(let i=0;i<35;i++) {
-    particles.push({
-      x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-0.5)*0.12, vy: (Math.random()-0.5)*0.08,
-      r: 0.8+Math.random()*1.8,
-      color: COLORS[i%COLORS.length],
-      pulse: Math.random()*Math.PI*2
-    });
-  }
+    // --- Flowing lines ---
+    var lines = [];
+    for(var i=0;i<10;i++){
+      lines.push({
+        x1:Math.random()*W, y1:Math.random()*H,
+        x2:Math.random()*W, y2:Math.random()*H,
+        t:Math.random(), sp:0.0003+Math.random()*0.0005,
+        c:COLORS[i%COLORS.length]
+      });
+    }
 
-  // --- Large slow orbs ---
-  const orbs = [];
-  for(let i=0;i<4;i++) {
-    orbs.push({
-      x: Math.random()*W, y: Math.random()*H,
-      r: 120+Math.random()*180,
-      color: COLORS[i%COLORS.length].replace(/[\d.]+\)$/,'0.04)'),
-      vx: (Math.random()-0.5)*0.08, vy: (Math.random()-0.5)*0.06,
-      driftPhase: Math.random()*Math.PI*2
-    });
-  }
+    // --- Particles ---
+    var pts = [];
+    for(var i=0;i<30;i++){
+      pts.push({
+        x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.1, vy:(Math.random()-0.5)*0.08,
+        r:0.8+Math.random()*1.5, c:COLORS[i%COLORS.length], ph:Math.random()*6.28
+      });
+    }
 
-  // --- Circuit-style paths ---
-  const circuits = [];
-  for(let i=0;i<8;i++) {
-    const sx=Math.random()*W, sy=Math.random()*H;
-    circuits.push({points:[{x:sx,y:sy}], color:COLORS[i%COLORS.length], speed:0.3+Math.random()*0.4, dir:Math.random()*Math.PI*2, life:0, maxLife:200+Math.random()*300});
-  }
+    // --- Large orbs ---
+    var orbs = [];
+    for(var i=0;i<4;i++){
+      orbs.push({
+        x:Math.random()*W, y:Math.random()*H,
+        r:150+Math.random()*150,
+        c:COLORS[i%COLORS.length].replace('0.10)','0.035)').replace('0.08)','0.03)').replace('0.06)','0.02)').replace('0.035)','0.025)').replace('0.025)','0.02)'),
+        vx:(Math.random()-0.5)*0.06, vy:(Math.random()-0.5)*0.05, ph:Math.random()*6.28
+      });
+    }
 
-  function drawFrame() {
-    ctx2.clearRect(0,0,W,H);
+    // --- Circuits ---
+    var circuits = [];
+    for(var i=0;i<6;i++){
+      var sx=Math.random()*W, sy=Math.random()*H;
+      circuits.push({pts:[{x:sx,y:sy}], c:COLORS[i%COLORS.length], sp:0.3+Math.random()*0.3, dir:Math.random()*6.28, life:0, maxL:250+Math.random()*250});
+    }
 
-    // Large soft orbs
-    orbs.forEach(o => {
-      o.x += o.vx; o.y += o.vy+Math.sin(o.driftPhase)*0.05;
-      o.driftPhase += 0.002;
-      if(o.x<-200) o.x=W+200; if(o.x>W+200) o.x=-200;
-      if(o.y<-200) o.y=H+200; if(o.y>H+200) o.y=-200;
-      const g = ctx2.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g.addColorStop(0,o.color); g.addColorStop(1,'transparent');
-      ctx2.fillStyle=g; ctx2.beginPath(); ctx2.arc(o.x,o.y,o.r,0,Math.PI*2); ctx2.fill();
-    });
+    function frame(){
+      ctx.clearRect(0,0,W,H);
 
-    // Circuit paths
-    circuits.forEach(c => {
-      c.life++;
-      if(c.life>c.maxLife){c.points=[{x:Math.random()*W,y:Math.random()*H}];c.life=0;c.dir=Math.random()*Math.PI*2;}
-      const last=c.points[c.points.length-1];
-      c.dir+=(Math.random()-0.5)*0.15;
-      const nx=last.x+Math.cos(c.dir)*c.speed;
-      const ny=last.y+Math.sin(c.dir)*c.speed;
-      if(nx>0&&nx<W&&ny>0&&ny<H){c.points.push({x:nx,y:ny});if(c.points.length>40)c.points.shift();}
-      else{c.dir+=Math.PI;}
-      if(c.points.length>1){
-        ctx2.strokeStyle=c.color; ctx2.lineWidth=0.8; ctx2.beginPath(); ctx2.moveTo(c.points[0].x,c.points[0].y);
-        for(let i=1;i<c.points.length;i++) ctx2.lineTo(c.points[i].x,c.points[i].y);
-        ctx2.stroke();
-        ctx2.fillStyle=c.color.replace(/[\d.]+\)$/,'0.2)');
-        ctx2.beginPath(); ctx2.arc(nx,ny,3,0,Math.PI*2); ctx2.fill();
+      // Orbs
+      for(var i=0;i<orbs.length;i++){
+        var o=orbs[i]; o.x+=o.vx; o.y+=o.vy+Math.sin(o.ph)*0.04; o.ph+=0.002;
+        if(o.x<-200)o.x=W+200; if(o.x>W+200)o.x=-200; if(o.y<-200)o.y=H+200; if(o.y>H+200)o.y=-200;
+        var g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+        g.addColorStop(0,o.c); g.addColorStop(1,'transparent');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,6.283); ctx.fill();
       }
-    });
 
-    // Connection lines with flowing dots
-    connections.forEach(c => {
-      c.progress += c.speed;
-      if(c.progress>1) { c.x1=Math.random()*W; c.y1=Math.random()*H; c.x2=Math.random()*W; c.y2=Math.random()*H; c.progress=0; }
-      ctx2.strokeStyle=c.color; ctx2.lineWidth=c.width; ctx2.beginPath();
-      ctx2.moveTo(c.x1,c.y1); ctx2.lineTo(c.x2,c.y2); ctx2.stroke();
-      const dx=c.x1+(c.x2-c.x1)*c.progress, dy=c.y1+(c.y2-c.y1)*c.progress;
-      const dotAlpha = Math.sin(c.progress*Math.PI)*0.25;
-      ctx2.fillStyle=c.color.replace(/[\d.]+\)$/,dotAlpha+')');
-      ctx2.beginPath(); ctx2.arc(dx,dy,2.5,0,Math.PI*2); ctx2.fill();
-    });
+      // Circuits
+      for(var i=0;i<circuits.length;i++){
+        var c=circuits[i]; c.life++;
+        if(c.life>c.maxL){c.pts=[{x:Math.random()*W,y:Math.random()*H}];c.life=0;c.dir=Math.random()*6.28;}
+        var last=c.pts[c.pts.length-1];
+        c.dir+=(Math.random()-0.5)*0.12;
+        var nx=last.x+Math.cos(c.dir)*c.sp, ny=last.y+Math.sin(c.dir)*c.sp;
+        if(nx>0&&nx<W&&ny>0&&ny<H){c.pts.push({x:nx,y:ny});if(c.pts.length>35)c.pts.shift();}
+        else{c.dir+=3.1416;}
+        if(c.pts.length>1){
+          ctx.strokeStyle=c.c; ctx.lineWidth=0.7; ctx.beginPath(); ctx.moveTo(c.pts[0].x,c.pts[0].y);
+          for(var j=1;j<c.pts.length;j++) ctx.lineTo(c.pts[j].x,c.pts[j].y);
+          ctx.stroke();
+          ctx.fillStyle=c.c; ctx.beginPath(); ctx.arc(nx,ny,2.5,0,6.283); ctx.fill();
+        }
+      }
 
-    // Floating icons
-    floatingIcons.forEach(ic => {
-      ic.x += ic.vx; ic.y += ic.vy + Math.sin(ic.driftPhase)*0.08;
-      ic.driftPhase += ic.driftSpeed;
-      ic.rot += ic.rotSpeed;
-      ic.pulse += ic.pulseSpeed;
-      if(ic.x<-60) ic.x=W+60; if(ic.x>W+60) ic.x=-60;
-      if(ic.y<-60) ic.y=H+60; if(ic.y>H+60) ic.y=-60;
-      const s = ic.scale * (1+Math.sin(ic.pulse)*0.08);
-      ICONS[ic.icon](ctx2, ic.x, ic.y, s, ic.color);
-      ctx2.fillStyle=ic.color.replace(/[\d.]+\)$/,'0.04)');
-      ctx2.beginPath(); ctx2.arc(ic.x,ic.y,18*s,0,Math.PI*2); ctx2.fill();
-    });
+      // Lines with flowing dots
+      for(var i=0;i<lines.length;i++){
+        var l=lines[i]; l.t+=l.sp;
+        if(l.t>1){l.x1=Math.random()*W;l.y1=Math.random()*H;l.x2=Math.random()*W;l.y2=Math.random()*H;l.t=0;}
+        ctx.strokeStyle=l.c; ctx.lineWidth=0.6; ctx.beginPath(); ctx.moveTo(l.x1,l.y1); ctx.lineTo(l.x2,l.y2); ctx.stroke();
+        var dx=l.x1+(l.x2-l.x1)*l.t, dy=l.y1+(l.y2-l.y1)*l.t;
+        var da=Math.sin(l.t*3.1416)*0.2;
+        ctx.fillStyle=l.c.replace(/\d+\.?\d*\)$/,da+')');
+        ctx.beginPath(); ctx.arc(dx,dy,2,0,6.283); ctx.fill();
+      }
 
-    // Ambient particles
-    particles.forEach(p => {
-      p.x += p.vx; p.y += p.vy;
-      p.pulse += 0.01;
-      if(p.x<0) p.x=W; if(p.x>W) p.x=0;
-      if(p.y<0) p.y=H; if(p.y>H) p.y=0;
-      const a = 0.06+Math.sin(p.pulse)*0.04;
-      ctx2.fillStyle=p.color.replace(/[\d.]+\)$/,a+')');
-      ctx2.beginPath(); ctx2.arc(p.x,p.y,p.r,0,Math.PI*2); ctx2.fill();
-    });
+      // Icons
+      for(var i=0;i<icons.length;i++){
+        var ic=icons[i]; ic.x+=ic.vx; ic.y+=ic.vy+Math.sin(ic.drift)*0.06; ic.drift+=ic.ds; ic.ph+=ic.sp;
+        if(ic.x<-50)ic.x=W+50; if(ic.x>W+50)ic.x=-50; if(ic.y<-50)ic.y=H+50; if(ic.y>H+50)ic.y=-50;
+        var sc=ic.s*(1+Math.sin(ic.ph)*0.06);
+        ic.fn(ic.x,ic.y,sc,ic.c);
+      }
 
-    requestAnimationFrame(drawFrame);
-  }
-  drawFrame();
+      // Particles
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i]; p.x+=p.vx; p.y+=p.vy; p.ph+=0.008;
+        if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+        var a=0.05+Math.sin(p.ph)*0.03;
+        ctx.fillStyle=p.c.replace(/\d+\.?\d*\)$/,a+')');
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.283); ctx.fill();
+      }
+
+      requestAnimationFrame(frame);
+    }
+    frame();
+  })();
