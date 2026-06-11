@@ -736,8 +736,8 @@
 <button class="nav-btn next" onclick="changeSlide(1)"><svg><use href="#icon-chevron-right"/></svg></button>
 
 <script>
-  const slides = document.querySelectorAll('.slide');
-  let current = 0;
+  var slides = document.querySelectorAll('.slide');
+  var current = 0;
 
   function goTo(n) {
     if (n < 0 || n >= slides.length) return;
@@ -746,51 +746,45 @@
     current = n;
     slides[current].classList.remove('exit-up');
     slides[current].classList.add('active');
-    setTimeout(() => slides.forEach((s,i) => { if(i!==current) s.classList.remove('exit-up'); }), 800);
+    setTimeout(function(){ slides.forEach(function(s,i){ if(i!==current) s.classList.remove('exit-up'); }); }, 800);
+    // Trigger module animations for new slide
+    animateSlide(slides[current]);
   }
+
   function changeSlide(dir) { goTo(current + dir); }
 
-  document.addEventListener('keydown', e => {
+  document.addEventListener('keydown', function(e){
     if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); changeSlide(1); }
     if(e.key==='ArrowLeft') { e.preventDefault(); changeSlide(-1); }
   });
 
   // Word reveal
-  document.querySelectorAll('.word-reveal').forEach(el => {
-    const text = el.textContent.trim();
-    el.innerHTML = text.split(/\s+/).map((w,i) =>
-      `<span class="word" style="transition-delay:${0.2 + i*0.12}s">${w}</span>`
-    ).join(' ');
+  document.querySelectorAll('.word-reveal').forEach(function(el){
+    var text = el.textContent.trim();
+    el.innerHTML = text.split(/\s+/).map(function(w,i){
+      return '<span class="word" style="transition-delay:'+(0.2+i*0.12)+'s">'+w+'</span>';
+    }).join(' ');
   });
 
-  // ============================================================
-  // ENHANCED MODULE ANIMATIONS — staggered entrance per slide
-  // ============================================================
+  // Module stagger animation
   function animateSlide(slide) {
-    // Animate flow nodes with stagger
     var nodes = slide.querySelectorAll('.flow-node, .example-card, .benefit-item, .tool-chip');
     nodes.forEach(function(el, i) {
       el.style.opacity = '0';
-      el.style.transform = 'translateY(30px)';
-      el.style.transition = 'opacity 1.2s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1)';
-      setTimeout(function() {
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1)';
+      el.style.transitionDelay = (i * 100) + 'ms';
+      // Force reflow
+      el.offsetHeight;
+      setTimeout(function(){
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
-      }, 100 + i * 120);
+      }, 50);
     });
   }
 
-  // Animate on slide change
-  var origGoTo = goTo;
-  goTo = function(n) {
-    origGoTo(n);
-    setTimeout(function() {
-      animateSlide(slides[current]);
-    }, 50);
-  };
-
   // Animate first slide
-  setTimeout(function() { animateSlide(slides[0]); }, 200);
+  setTimeout(function(){ animateSlide(slides[0]); }, 300);
 
   // ============================================================
   // INFINITE BACKGROUND ANIMATION — floating motion graphics
