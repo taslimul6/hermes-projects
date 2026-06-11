@@ -76,7 +76,7 @@
     opacity: 0;
     transform: translateX(-80px) scale(0.96);
   }
-  /* ===== GLASS ===== */
+
   .glass {
     background: linear-gradient(135deg, rgba(255,255,255,0.82), rgba(255,255,255,0.65));
     backdrop-filter: blur(28px);
@@ -89,7 +89,6 @@
       inset 0 1px 0 rgba(255,255,255,0.5);
   }
 
-  /* ===== TYPOGRAPHY ===== */
   .slide h1 {
     font-size: clamp(2.4rem, 6vw, 4.5rem);
     font-weight: 800;
@@ -138,37 +137,15 @@
     display: inline-block;
   }
 
-  .key-term { font-weight: 800; }
+  .key-term {
+    display: inline-block;
+    font-weight: 800;
+    position: relative;
+  }
   .key-term.trigger { color: var(--trigger); }
   .key-term.action { color: var(--action); }
   .key-term.auto { color: var(--auto); }
   .key-term.accent { color: var(--accent); }
-
-  /* Gradient text utility */
-  .gradient-text {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .gradient-text-warm {
-    background: linear-gradient(135deg, var(--trigger), var(--action));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .gradient-text-cool {
-    background: linear-gradient(135deg, var(--action), var(--auto));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .gradient-text-full {
-    background: linear-gradient(135deg, var(--trigger), var(--action), var(--auto));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
 
   /* Flow Diagram */
   .flow-container {
@@ -176,7 +153,7 @@
     align-items: center;
     justify-content: center;
     gap: 0;
-    margin: 36px 0;
+    margin: 40px 0;
     flex-wrap: wrap;
   }
 
@@ -184,20 +161,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 26px 30px;
-    border-radius: 22px;
+    padding: 24px 28px;
+    border-radius: 20px;
     min-width: 150px;
     position: relative;
-    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s cubic-bezier(0.16,1,0.3,1);
-    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    transition: transform 0.4s ease;
   }
-  .flow-node:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 40px rgba(108,92,231,0.1), 0 4px 12px rgba(0,0,0,0.06);
-  }
+  .flow-node:hover { transform: translateY(-4px); }
 
   .flow-node .icon {
     width: 58px; height: 58px;
@@ -211,7 +181,9 @@
   }
 
   .flow-node.trigger-node .icon { background: linear-gradient(135deg, var(--trigger), #fab1a0); color: white; }
+
   .flow-node.action-node .icon { background: linear-gradient(135deg, var(--action), #55efc4); color: white; }
+
   .flow-node.auto-node .icon { background: linear-gradient(135deg, var(--auto), #74b9ff); color: white; }
 
   .flow-node .label {
@@ -223,7 +195,6 @@
     font-size: 0.75rem;
     color: var(--text-secondary);
     text-align: center;
-    line-height: 1.4;
   }
 
   .flow-arrow {
@@ -320,48 +291,39 @@
   .example-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin: 24px 0;
+    gap: 16px;
+    margin: 28px 0;
     width: 100%;
-    max-width: 860px;
+    max-width: 850px;
   }
 
   .example-card {
-    padding: 22px 16px;
-    border-radius: 20px;
+    padding: 20px 16px;
+    border-radius: 18px;
     text-align: center;
-    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s cubic-bezier(0.16,1,0.3,1);
-    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease;
   }
-  .example-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 32px rgba(108,92,231,0.08), 0 4px 12px rgba(0,0,0,0.04);
-  }
+  .example-card:hover { transform: translateY(-3px); }
 
   .example-card .card-icon {
-    width: 48px; height: 48px;
+    width: 46px; height: 46px;
     border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 20px;
     margin: 0 auto 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   }
 
   .example-card h4 {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 700;
     margin-bottom: 4px;
-    color: var(--text);
   }
 
   .example-card p {
-    font-size: 0.74rem;
-    line-height: 1.45;
+    font-size: 0.72rem;
+    line-height: 1.4;
   }
 
   /* Benefit Pills */
@@ -376,19 +338,15 @@
   .benefit-item {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 24px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s cubic-bezier(0.16,1,0.3,1);
+    gap: 14px;
+    padding: 14px 22px;
+    border-radius: 16px;
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    transition: transform 0.3s ease;
   }
-  .benefit-item:hover {
-    transform: translateX(8px);
-    box-shadow: 0 8px 28px rgba(108,92,231,0.08), 0 4px 12px rgba(0,0,0,0.04);
-  }
+  .benefit-item:hover { transform: translateX(6px); }
 
   .benefit-item .b-icon {
     width: 44px; height: 44px;
@@ -404,16 +362,15 @@
   }
 
   .benefit-item .b-text {
-    font-size: 0.96rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text);
-    line-height: 1.4;
   }
 
   /* Tools Grid */
   .tools-grid {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     margin: 24px 0;
     flex-wrap: wrap;
     justify-content: center;
@@ -421,25 +378,16 @@
 
   .tool-chip {
     padding: 14px 28px;
-    border-radius: 16px;
+    border-radius: 14px;
     font-weight: 700;
     font-size: 1rem;
-    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s cubic-bezier(0.16,1,0.3,1);
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    transition: transform 0.3s ease;
   }
-  .tool-chip:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 28px rgba(108,92,231,0.1), 0 4px 12px rgba(0,0,0,0.05);
-  }
+  .tool-chip:hover { transform: translateY(-3px); }
 
-  /* CTA */
-  .cta-box {
-    margin-top: 28px;
-    padding: 18px 36px;
-    border-radius: 16px;
   /* CTA */
   .cta-box {
     margin-top: 28px;
@@ -459,26 +407,24 @@
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    width: 52px; height: 52px;
+    width: 48px; height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6));
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.7);
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.2rem;
     cursor: pointer;
     z-index: 100;
-    transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+    transition: all 0.3s ease;
     color: var(--text);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   }
   .nav-btn:hover {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    background: var(--accent);
     color: white;
-    box-shadow: 0 8px 30px rgba(108,92,231,0.35);
-    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 4px 20px rgba(108,92,231,0.4);
   }
   .nav-btn.prev { left: 24px; }
   .nav-btn.next { right: 24px; }
@@ -845,7 +791,7 @@
     if(e.key==='ArrowLeft') changeSlide(-1);
   });
 
-  // ===== CANVAS BACKGROUND ANIMATION =====
+  // ===== CANVAS: WORKFLOW AUTOMATION ANIMATION =====
   const canvas = document.getElementById('bgCanvas');
   const ctx = canvas.getContext('2d');
   let W, H;
