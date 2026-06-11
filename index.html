@@ -205,7 +205,7 @@
     font-size: 2rem;
     color: var(--accent-light);
     margin: 0 8px;
-    animation: flowPulse 2s ease-in-out infinite;
+    animation: flowPulse 4s ease-in-out infinite;
     flex-shrink: 0;
   }
 
@@ -840,11 +840,11 @@
   for(let i=0;i<nodeCount;i++) {
     nodes.push({
       x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-0.5)*0.35, vy: (Math.random()-0.5)*0.35,
+      vx: (Math.random()-0.5)*0.12, vy: (Math.random()-0.5)*0.12,
       r: 16+Math.random()*12,
       icon: icons[i%icons.length],
       pulse: Math.random()*Math.PI*2,
-      pulseSpeed: 0.008+Math.random()*0.015
+      pulseSpeed: 0.003+Math.random()*0.005
     });
   }
 
@@ -859,7 +859,7 @@
     return {
       x: a.x, y: a.y, tx: b.x, ty: b.y,
       progress: Math.random(),
-      speed: 0.002+Math.random()*0.004,
+      speed: 0.0006+Math.random()*0.001,
       size: 2+Math.random()*2.5,
       color: ['rgba(108,92,231,','rgba(225,112,85,','rgba(0,184,148,','rgba(9,132,227,','rgba(253,203,110,'][Math.floor(Math.random()*5)]
     };
@@ -871,7 +871,7 @@
     ambient.push({
       x: Math.random()*W, y: Math.random()*H,
       r: 1+Math.random()*2,
-      vx: (Math.random()-0.5)*0.12, vy: (Math.random()-0.5)*0.12,
+      vx: (Math.random()-0.5)*0.04, vy: (Math.random()-0.5)*0.04,
       o: 0.08+Math.random()*0.2
     });
   }
